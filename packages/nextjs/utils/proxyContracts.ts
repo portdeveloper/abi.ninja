@@ -2,6 +2,9 @@ import { createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
 
 const publicClient = createPublicClient({
+  batch: {
+    multicall: true,
+  },
   chain: mainnet,
   transport: http(),
 });
@@ -66,91 +69,24 @@ export const parse1167Bytecode = (bytecode: unknown): string => {
 };
 
 export const detectProxyTarget = async (proxyAddress: `0x${string}`): Promise<string | null> => {
-  const strategies = [
-    // EIP-1167 Minimal Proxy Contract
-    async () => {
-      const res = await publicClient.getBytecode({
-        address: proxyAddress,
-      });
-      // const bytecode = extractBytecode(res);
-      return parse1167Bytecode(res);
-    },
-    // EIP-1967 direct proxy
-    async () => {
-      const data = await publicClient.getStorageAt({
-        address: proxyAddress,
-        slot: EIP_1967_LOGIC_SLOT,
-      });
-      return readAddress(data);
-    },
-    // EIP-1967 beacon proxy
-    async () => {
-      const data = await publicClient.getStorageAt({
-        address: proxyAddress,
-        slot: EIP_1967_BEACON_SLOT,
-      });
+  const results = await Promise.any([
+    publicClient.getBytecode({ address: proxyAddress }).then(parse1167Bytecode),
+    publicClient.getStorageAt({ address: proxyAddress, slot: EIP_1967_LOGIC_SLOT }).then(readAddress),
+    publicClient
+      .getStorageAt({ address: proxyAddress, slot: EIP_1967_BEACON_SLOT })
+      .then(readAddress)
+      .then(beaconAddress =>
+        Promise.any(
+          EIP_1167_BEACON_METHODS.map(method =>
+            publicClient.call({ data: method, to: beaconAddress }).then(({ data }) => readAddress(data)),
+          ),
+        ),
+      ),
+    publicClient.getStorageAt({ address: proxyAddress, slot: EIP_1822_LOGIC_SLOT }).then(readAddress),
+    publicClient.call({ data: EIP_897_INTERFACE[0], to: proxyAddress }).then(({ data }) => readAddress(data)),
+    publicClient.call({ data: GNOSIS_SAFE_PROXY_INTERFACE[0], to: proxyAddress }).then(({ data }) => readAddress(data)),
+    publicClient.call({ data: COMPTROLLER_PROXY_INTERFACE[0], to: proxyAddress }).then(({ data }) => readAddress(data)),
+  ]);
 
-      const beaconAdress = readAddress(data);
-      for (const method of EIP_1167_BEACON_METHODS) {
-        try {
-          const { data } = await publicClient.call({
-            data: method as `0x${string}`,
-            to: beaconAdress,
-          });
-          return readAddress(data);
-        } catch (error) {}
-      }
-      throw new Error("Beacon address resolution failed");
-    },
-    // // OpenZeppelin proxy pattern @remind serves no purpose?
-    // async () => {
-    //   const data = await publicClient.getStorageAt({
-    //     address: proxyAddress,
-    //     slot: OPEN_ZEPPELIN_IMPLEMENTATION_SLOT,
-    //   });
-    //   console.log("data", data);
-    //   return readAddress(data);
-    // },
-    // EIP-1822 Universal Upgradeable Proxy Standard
-    async () => {
-      const data = await publicClient.getStorageAt({
-        address: proxyAddress,
-        slot: EIP_1822_LOGIC_SLOT,
-      });
-      return readAddress(data);
-    },
-    // EIP-897 DelegateProxy pattern
-    async () => {
-      const { data } = await publicClient.call({
-        data: EIP_897_INTERFACE[0] as `0x${string}`,
-        to: proxyAddress,
-      });
-      return readAddress(data);
-    },
-    // GnosisSafeProxy contract
-    async () => {
-      const { data } = await publicClient.call({
-        data: GNOSIS_SAFE_PROXY_INTERFACE[0] as `0x${string}`,
-        to: proxyAddress,
-      });
-      return readAddress(data);
-    },
-    // Comptroller proxy
-    async () => {
-      const { data } = await publicClient.call({
-        data: COMPTROLLER_PROXY_INTERFACE[0] as `0x${string}`,
-        to: proxyAddress,
-      });
-      return readAddress(data);
-    },
-  ];
-
-  for (const strategy of strategies) {
-    try {
-      const result = await strategy();
-      if (result) return result;
-    } catch (error) {}
-  }
-
-  return null;
+  return results;
 };
