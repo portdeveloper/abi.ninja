@@ -1,11 +1,26 @@
 import { useState } from "react";
 import { detectProxyTarget } from "../utils/proxyContracts";
 import { testCases } from "../utils/testCases";
+import { createPublicClient, http } from "viem";
+import { mainnet } from "viem/chains";
+import { usePublicClient } from "wagmi";
 
-export const NewCodeViem = () => {
+export const NewCodeViem = ({ network }: { network: any }) => {
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [timeTaken, setTimeTaken] = useState(0);
+
+  const client = usePublicClient({
+    chainId: parseInt(network),
+  });
+
+  // const client = createPublicClient({
+  //   batch: {
+  //     multicall: true,
+  //   },
+  //   chain: network,
+  //   transport: http(),
+  // });
 
   const runTests = async () => {
     setIsLoading(true);
@@ -15,7 +30,7 @@ export const NewCodeViem = () => {
 
     for (const testCase of testCases) {
       try {
-        const result = await detectProxyTarget(testCase.address);
+        const result = await detectProxyTarget(testCase.address, client);
 
         const passed = result === testCase.expected;
         newResults.push({ ...testCase, result, passed });

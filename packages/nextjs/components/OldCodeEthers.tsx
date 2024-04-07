@@ -12,6 +12,7 @@ export const OldCodeEthers = () => {
   const [timeTaken, setTimeTaken] = useState(0);
 
   const runTests = async () => {
+    setResults([]);
     setIsLoading(true);
     const startTime = performance.now();
 
@@ -21,7 +22,6 @@ export const OldCodeEthers = () => {
       try {
         // const result = await detectProxyTarget(testCase.address);
         const result = await detectProxyTarget(testCase.address, requestFunc, "latest");
-
         const passed = result === testCase.expected;
         newResults.push({ ...testCase, result, passed });
       } catch (error) {

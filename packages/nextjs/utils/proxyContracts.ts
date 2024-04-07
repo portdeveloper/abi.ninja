@@ -1,13 +1,4 @@
-import { createPublicClient, http } from "viem";
-import { mainnet } from "viem/chains";
-
-const publicClient = createPublicClient({
-  batch: {
-    multicall: true,
-  },
-  chain: mainnet,
-  transport: http(),
-});
+import { Client, PublicClient } from "viem";
 
 const EIP_1967_LOGIC_SLOT = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
 const EIP_1967_BEACON_SLOT = "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50";
@@ -68,25 +59,35 @@ export const parse1167Bytecode = (bytecode: unknown): string => {
   return `0x${addressFromBytecode.padStart(40, "0")}`;
 };
 
-export const detectProxyTarget = async (proxyAddress: `0x${string}`): Promise<string | null> => {
-  const results = await Promise.any([
-    publicClient.getBytecode({ address: proxyAddress }).then(parse1167Bytecode),
-    publicClient.getStorageAt({ address: proxyAddress, slot: EIP_1967_LOGIC_SLOT }).then(readAddress),
-    publicClient
-      .getStorageAt({ address: proxyAddress, slot: EIP_1967_BEACON_SLOT })
-      .then(readAddress)
-      .then(beaconAddress =>
-        Promise.any(
-          EIP_1167_BEACON_METHODS.map(method =>
-            publicClient.call({ data: method, to: beaconAddress }).then(({ data }) => readAddress(data)),
+export const detectProxyTarget = async (proxyAddress: string, client: PublicClient): Promise<string | null> => {
+  try {
+    const result = await Promise.any([
+      client.getBytecode({ address: proxyAddress }).then(parse1167Bytecode),
+      client.getStorageAt({ address: proxyAddress, slot: EIP_1967_LOGIC_SLOT }).then(readAddress),
+      client
+        .getStorageAt({ address: proxyAddress, slot: EIP_1967_BEACON_SLOT })
+        .then(readAddress)
+        .then(beaconAddress =>
+          Promise.any(
+            EIP_1167_BEACON_METHODS.map(method =>
+              client.call({ data: method, to: beaconAddress }).then(({ data }) => readAddress(data)),
+            ),
           ),
         ),
-      ),
-    publicClient.getStorageAt({ address: proxyAddress, slot: EIP_1822_LOGIC_SLOT }).then(readAddress),
-    publicClient.call({ data: EIP_897_INTERFACE[0], to: proxyAddress }).then(({ data }) => readAddress(data)),
-    publicClient.call({ data: GNOSIS_SAFE_PROXY_INTERFACE[0], to: proxyAddress }).then(({ data }) => readAddress(data)),
-    publicClient.call({ data: COMPTROLLER_PROXY_INTERFACE[0], to: proxyAddress }).then(({ data }) => readAddress(data)),
-  ]);
+    ]);
+    return result;
+  } catch {
+    const results = await Promise.any([
+      client.getStorageAt({ address: proxyAddress, slot: EIP_1822_LOGIC_SLOT }).then(readAddress),
+      client.call({ data: EIP_897_INTERFACE[0], to: proxyAddress }).then(({ data }) => readAddress(data)),
+      client
+        .call({ data: GNOSIS_SAFE_PROXY_INTERFACE[0], to: proxyAddress })
+        .then(({ data }) => readAddress(data)),
+      client
+        .call({ data: COMPTROLLER_PROXY_INTERFACE[0], to: proxyAddress })
+        .then(({ data }) => readAddress(data)),
+    ]);
 
-  return results;
+    return results;
+  }
 };
