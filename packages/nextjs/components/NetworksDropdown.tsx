@@ -1,16 +1,16 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import * as chains from "@wagmi/core/chains";
 import { useTheme } from "next-themes";
 import Select, { MultiValue, OptionProps, SingleValue, components } from "react-select";
 import { EyeIcon, WrenchScrewdriverIcon } from "@heroicons/react/24/outline";
-import { getPopularTargetNetworks } from "~~/utils/scaffold-eth";
+import { getPopularTargetNetworks, getTargetNetworks } from "~~/utils/scaffold-eth";
 
 type Options = {
   value: number | string;
   label: string;
   icon?: string | ReactNode;
 };
+
 type GroupedOptions = Record<
   "mainnet" | "testnet" | "localhost",
   {
@@ -64,6 +64,8 @@ groupedOptions.mainnet.options.push({
   label: "See All Chains",
   icon: "EyeIcon",
 });
+
+const chains = getTargetNetworks();
 
 const allChains = Object.values(chains).map(chain => ({
   value: chain.id,
