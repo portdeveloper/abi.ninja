@@ -1,11 +1,9 @@
 import * as chains from "viem/chains";
+import { Chain } from "viem/chains";
 import scaffoldConfig from "~~/scaffold.config";
 
 type ChainAttributes = {
-  // color | [lightThemeColor, darkThemeColor]
   color: string | [string, string];
-  // Used to fetch price by providing mainnet token address
-  // for networks having native currency other than ETH
   nativeCurrencyTokenAddress?: string;
   etherscanEndpoint?: string;
   etherscanApiKey?: string;
@@ -13,7 +11,7 @@ type ChainAttributes = {
   groupSelector?: string;
 };
 
-export type ChainWithAttributes = chains.Chain & Partial<ChainAttributes>;
+export type ChainWithAttributes = Chain & Partial<ChainAttributes>;
 
 const MAINNET_ETHERSCAN_API_KEY = process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY || "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW";
 const OPTIMISM_ETHERSCAN_API_KEY = process.env.NEXT_PUBLIC_OPTIMISM_ETHERSCAN_API_KEY || "";
@@ -109,10 +107,6 @@ export const NETWORKS_EXTRA_DATA: Record<string, ChainAttributes> = {
   },
 };
 
-/**
- * Gives the block explorer transaction URL.
- * Returns empty string if the network is a local chain
- */
 export function getBlockExplorerTxLink(chainId: number, txnHash: string) {
   const chainNames = Object.keys(chains);
 
@@ -136,10 +130,6 @@ export function getBlockExplorerTxLink(chainId: number, txnHash: string) {
   return `${blockExplorerTxURL}/tx/${txnHash}`;
 }
 
-/**
- * Gives the block explorer URL for a given address.
- * Defaults to Etherscan if no (wagmi) block explorer is configured for the network.
- */
 export function getBlockExplorerAddressLink(network: chains.Chain, address: string) {
   const blockExplorerBaseURL = network.blockExplorers?.default?.url;
   if (network.id === chains.hardhat.id) {
@@ -153,17 +143,44 @@ export function getBlockExplorerAddressLink(network: chains.Chain, address: stri
   return `${blockExplorerBaseURL}/address/${address}`;
 }
 
-/**
- * @returns targetNetworks array containing networks configured in scaffold.config including extra network metadata
- */
+const CUSTOM_CHAINS_KEY = "customChains";
+
+const getCustomChainsFromStorage = (): ChainWithAttributes[] => {
+  if (typeof window !== "undefined") {
+    const storedChains = localStorage.getItem(CUSTOM_CHAINS_KEY);
+    return storedChains ? JSON.parse(storedChains) : [];
+  }
+  return [];
+};
+
+const saveCustomChainsToStorage = (chains: ChainWithAttributes[]) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(CUSTOM_CHAINS_KEY, JSON.stringify(chains));
+  }
+};
+
+const customChains = getCustomChainsFromStorage();
+
+export function addCustomChain(chain: ChainWithAttributes) {
+  customChains.push(chain);
+  saveCustomChainsToStorage(customChains);
+}
+
+export function deleteCustomChain(chainId: number) {
+  const index = customChains.findIndex(chain => chain.id === chainId);
+  if (index !== -1) {
+    customChains.splice(index, 1);
+    saveCustomChainsToStorage(customChains);
+  }
+}
+
 export function getTargetNetworks(): ChainWithAttributes[] {
-  // Get all chains from viem/chains
   const allChains: ChainWithAttributes[] = Object.values(chains).map(chain => ({
     ...chain,
     ...NETWORKS_EXTRA_DATA[chain.id],
   }));
 
-  return allChains;
+  return [...allChains, ...customChains];
 }
 
 export function getPopularTargetNetworks(): ChainWithAttributes[] {
