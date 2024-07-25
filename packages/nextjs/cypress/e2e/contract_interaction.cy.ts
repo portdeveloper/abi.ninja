@@ -686,7 +686,7 @@ describe("Contract Interaction", () => {
     cy.get("#react-select-container").click();
     cy.get('[role="option"]').contains("Sepolia").click();
     cy.get('input[placeholder="Contract address"]').type("0x759c0e9d7858566df8ab751026bedce462ff42df");
-    cy.wait(1000);
+    cy.wait(2000);
     cy.get("button:visible").contains("Decompile (beta)", { timeout: 10000 }).click({ force: true });
     cy.url().should("include", "/0x759c0e9d7858566df8ab751026bedce462ff42df/11155111");
     cy.contains("changeOwner").click();
