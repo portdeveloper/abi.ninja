@@ -665,7 +665,7 @@ describe("Contract Interaction", () => {
     cy.get("body").should("contain", "Result:");
   });
 
-  it("should load proxy contract on Base and interact with its balanceOf method", () => {
+  it("should load a proxy contract on Base and interact with its balanceOf method", () => {
     cy.visit("http://localhost:3000");
     cy.get("#react-select-container").click();
     cy.get('[role="option"]').contains("Base").click();
@@ -681,14 +681,15 @@ describe("Contract Interaction", () => {
     cy.get("body").should("contain", "Result:");
   });
 
-  it("should load unverified contract on Sepolia and ADD changeOwner write method to the UI", () => {
+  it("should load unverified contract on Sepolia + use heimdall on it and ADD changeOwner write method to the UI", () => {
     cy.visit("http://localhost:3000");
     cy.get("#react-select-container").click();
     cy.get('[role="option"]').contains("Sepolia").click();
     cy.get('input[placeholder="Contract address"]').type("0x759c0e9d7858566df8ab751026bedce462ff42df");
-    cy.wait(2000);
     cy.get("button:visible").contains("Decompile (beta)", { timeout: 10000 }).click({ force: true });
+    cy.wait(3000);
     cy.url().should("include", "/0x759c0e9d7858566df8ab751026bedce462ff42df/11155111");
+    cy.wait(1000);
     cy.contains("changeOwner").click();
   });
 
