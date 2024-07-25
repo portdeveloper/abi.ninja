@@ -674,6 +674,7 @@ describe("Contract Interaction", () => {
     cy.url().should("include", "/0xca808b3eada02d53073e129b25f74b31d8647ae0/8453");
     cy.contains("Implementation Address").should("be.visible");
     cy.contains("balanceOf").click();
+    cy.get('input[placeholder="address"]').should("be.visible");
     cy.get('input[placeholder="address"]').type("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"); // vitalik.eth
     cy.get("button").contains("Read 📡").click();
     cy.get("body").should("contain", "Result:");
@@ -689,22 +690,7 @@ describe("Contract Interaction", () => {
     cy.contains("changeOwner").click();
   });
 
-  it("should load proxy contract on Base and interact with its balanceOf method", () => {
-    cy.visit("http://localhost:3000");
-    cy.get("#react-select-container").click();
-    cy.get('[role="option"]').contains("Base").click();
-    cy.get('input[placeholder="Contract address"]').type("0xca808b3eada02d53073e129b25f74b31d8647ae0");
-    cy.get("button").contains("Load contract").click();
-    cy.url().should("include", "/0xca808b3eada02d53073e129b25f74b31d8647ae0/8453");
-    cy.contains("Implementation Address").should("be.visible");
-    cy.contains("balanceOf").click();
-    cy.get('input[placeholder="address"]').should("be.visible");
-    cy.get('input[placeholder="address"]').type("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"); // vitalik.eth
-    cy.get("button").contains("Read 📡").click();
-    cy.get("body").should("contain", "Result:");
-  });
-
-  it("should load proxy contract on BNB Smart Chain and interact with its balanceOf method", () => {
+  it("should load a contract on BNB Smart Chain and interact with its balanceOf method", () => {
     cy.visit("http://localhost:3000");
     cy.get("#react-select-container").click();
     cy.get('[role="option"]').contains("Other chains").click();
@@ -722,7 +708,7 @@ describe("Contract Interaction", () => {
     cy.get("body").should("contain", "Result:");
   });
 
-  it("should add Parex as a custom chain and interact with a verified contract", () => {
+  it("should add Parex as a custom chain and interact with a contract by submitting an ABI manually", () => {
     cy.visit("http://localhost:3000");
     cy.get("#react-select-container").click();
     cy.get('[role="option"]').contains("Add custom chain").click();
