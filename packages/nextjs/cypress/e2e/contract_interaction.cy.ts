@@ -662,7 +662,8 @@ describe("Contract Interaction", () => {
     cy.contains("balanceOf").click();
     cy.get('input[placeholder="address"]').type("0x6B175474E89094C44Da98b954EedeAC495271d0F");
     cy.get("button").contains("Read 📡").click();
-    cy.get("body").should("contain", "Result:", { timeout: 30000 });
+    cy.wait(5000);
+    cy.get("body").should("contain", "Result:", { timeout: 10000 });
   });
 
   it("should load proxy contract on Base and interact with its balanceOf method", () => {
@@ -676,7 +677,8 @@ describe("Contract Interaction", () => {
     cy.contains("balanceOf").click();
     cy.get('input[placeholder="address"]').type("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"); // vitalik.eth
     cy.get("button").contains("Read 📡").click();
-    cy.get("body").should("contain", "Result:", { timeout: 30000 });
+    cy.wait(5000);
+    cy.get("body").should("contain", "Result:", { timeout: 10000 });
   });
 
   it("should load unverified contract on Sepolia and ADD changeOwner write method to the UI", () => {
@@ -700,7 +702,8 @@ describe("Contract Interaction", () => {
     cy.contains("balanceOf").click();
     cy.get('input[placeholder="address"]').type("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"); // vitalik.eth
     cy.get("button").contains("Read 📡").click();
-    cy.get("body").should("contain", "Result:", { timeout: 30000 });
+    cy.wait(5000);
+    cy.get("body").should("contain", "Result:", { timeout: 10000 });
   });
 
   it("should load proxy contract on BNB Smart Chain and interact with its balanceOf method", () => {
@@ -718,7 +721,8 @@ describe("Contract Interaction", () => {
     cy.contains("balanceOf").click();
     cy.get('input[placeholder="address"]').type("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
     cy.get("button").contains("Read 📡").click();
-    cy.get("body").should("contain", "Result:", { timeout: 30000 });
+    cy.wait(5000);
+    cy.get("body").should("contain", "Result:", { timeout: 10000 });
   });
 
   it("should add Parex as a custom chain and interact with a verified contract", () => {
@@ -747,7 +751,8 @@ describe("Contract Interaction", () => {
     cy.contains("getUserBalance").click();
     cy.get('input[placeholder="address"]').type("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
     cy.get("button").contains("Read 📡").click();
-    cy.get("body").should("contain", "Result:", { timeout: 30000 });
+    cy.wait(5000);
+    cy.get("body").should("contain", "Result:", { timeout: 10000 });
   });
   // Add more test cases for other contracts as needed
 });
