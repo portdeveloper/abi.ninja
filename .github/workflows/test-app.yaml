@@ -15,23 +15,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
-
-      - name: Cache yarn dependencies
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
       - name: Cypress run
         uses: cypress-io/github-action@v5
         with:
@@ -41,6 +24,3 @@ jobs:
           wait-on: "http://localhost:3000"
         env:
           NEXT_PUBLIC_HEIMDALL_URL: "${{ secrets.NEXT_PUBLIC_HEIMDALL_URL }}"
-
-      - name: List bin directory (for debugging)
-        run: ls -la packages/nextjs/node_modules/.bin
