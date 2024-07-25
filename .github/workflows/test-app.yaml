@@ -22,7 +22,7 @@ jobs:
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
-        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
 
       - name: Cache yarn dependencies
         uses: actions/cache@v3
@@ -33,7 +33,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --immutable
 
       - name: Install Cypress
         run: yarn add cypress --dev
@@ -48,3 +48,6 @@ jobs:
           wait-on: "http://localhost:3000"
         env:
           NEXT_PUBLIC_HEIMDALL_URL: "${{ secrets.NEXT_PUBLIC_HEIMDALL_URL }}"
+
+      - name: List bin directory (for debugging)
+        run: ls -la ./packages/nextjs/node_modules/.bin
