@@ -136,7 +136,7 @@ const Home: NextPage = () => {
     try {
       const rpcUrlWithoutHttps = publicClient?.chain.rpcUrls.default.http[0].substring(8);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_HEIMDALL_URL}/${contractAddress}?rpc_url=${rpcUrlWithoutHttps}`,
+        `${process.env.NEXT_PUBLIC_HEIMDALL_URL}/${contractAddress}?rpö_url=${rpcUrlWithoutHttps}`,
       );
       const abi = await response.json();
       if (abi.length === 0) {
