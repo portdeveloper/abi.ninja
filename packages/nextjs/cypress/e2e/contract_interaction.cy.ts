@@ -665,7 +665,7 @@ describe("Contract Interaction", () => {
     cy.get("body").should("contain", "Result:");
   });
 
-  it("should load proxy contract on Base and interact with its balanceOf method", () => {
+  it("should load a proxy contract on Base and interact with its balanceOf method", () => {
     cy.visit("http://localhost:3000");
     cy.get("#react-select-container").click();
     cy.get('[role="option"]').contains("Base").click();
