@@ -674,6 +674,7 @@ describe("Contract Interaction", () => {
     cy.url().should("include", "/0xca808b3eada02d53073e129b25f74b31d8647ae0/8453");
     cy.contains("Implementation Address").should("be.visible");
     cy.contains("balanceOf").click();
+    cy.wait(1000);
     cy.get('input[placeholder="address"]').should("be.visible");
     cy.get('input[placeholder="address"]').type("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"); // vitalik.eth
     cy.get("button").contains("Read 📡").click();
@@ -736,5 +737,4 @@ describe("Contract Interaction", () => {
     cy.get("button").contains("Read 📡").click();
     cy.get("body").should("contain", "Result:");
   });
-  // Add more test cases for other contracts as needed
 });
