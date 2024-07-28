@@ -714,5 +714,6 @@ describe("Contract Interaction", () => {
     cy.url().should("include", "/0x6058518142C6AD506530F5A62dCc58050bf6fC28/322202");
     cy.get(".loading-spinner", { timeout: 10000 }).should("not.exist");
     cy.interactWithMethod("getUserBalance", "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
+
   });
 });
