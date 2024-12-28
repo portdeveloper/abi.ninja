@@ -1,4 +1,4 @@
-# ABI Ninja
+# ABI Ninja e
 
 Interact with smart contracts on any EVM chain. ABI Ninja provides an intuitive frontend for contracts from most popular EVM networks, currently supporting:
 
